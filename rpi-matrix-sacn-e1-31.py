@@ -49,22 +49,28 @@ logging.basicConfig(level=logging.DEBUG)
 receiver = sacn.sACNreceiver()
 receiver.start()  # start the receiving thread
 
+
 @receiver.listen_on('availability')  # check for availability of universes
 def callback_available(universe, changed):
     print(f'universe {universe}: {changed}')
 
 @receiver.listen_on('universe', universe=1) 
-
+@receiver.listen_on('universe', universe=2) 
+@receiver.listen_on('universe', universe=3) 
+@receiver.listen_on('universe', universe=4) 
+@receiver.listen_on('universe', universe=5) 
+@receiver.listen_on('universe', universe=6) 
+@receiver.listen_on('universe', universe=7) 
 def callback(packet):  # packet type: sacn.DataPacket
     print(f'{packet.universe}: {packet.dmxData[:8]}')  # print the received DMX data, but only the first 8 values
-    self.showDisplay(display_size_x,display_size_y,packet.dmxData)
+    showDisplay(display_size_x,display_size_y, packet.universe, packet.dmxData)
 
-def showDisplay(self, display_size_x, display_size_y, datastream):
+def showDisplay(display_size_x, display_size_y, universe, datastream):
       idx = 0
       x = 0
-      y = 0
-      rgb_length = len(datastream) 
-      while ((idx < (rgb_length)) and (y < (display_size_y - 1))):
+      y = (universe - 1) * 5
+      rgb_length = len(datastream)
+      while (idx < (rgb_length - 3)): # and (y < (display_size_y - 1))):
           r = datastream[idx]
           idx += 1
           g = datastream[idx]
@@ -77,6 +83,9 @@ def showDisplay(self, display_size_x, display_size_y, datastream):
               x = 0
               y += 1    
 
-receiver.join_multicast(1)
+#receiver.register_listener('universe', callback)
+
+for u in range(1, 8):
+    receiver.join_multicast(u)
 
 print("Running")
